@@ -1,9 +1,10 @@
 package indigo
 
+val cardDeck = CardDeck()
+
 fun main() {
 
-    val cardDeck = CardDeck()
-    cardDeck.operate()
-
+    val indigo = Game()
+    indigo.play()
 }
 
