@@ -19,7 +19,6 @@ class Player {
             println("choose a card to play (1-${cardsInHand.size}):")
             print("> ")
             cardNumber = readln()
-            println()
 
             if (cardNumber == "exit") {
                 condition = true
