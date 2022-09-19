@@ -1,20 +1,20 @@
 package indigo
 
-var gameOver = false
-val cardDealer = CardDealer()
-
 fun main() {
-    val indigo = Game()
-    indigo.play()
+    val indigoGame = Game()
+    indigoGame.play()
 }
 class Game {
+    private val deck = mutableListOf <String>()
+    private val cardsOnTheTable =  mutableListOf <String>()
     private val player = Player()
     private val computer = Player()
     private lateinit var playFirst: String
-    private var gameOver: Boolean = false
+    var gameOver: Boolean = false
 
     fun play() {
         println("Indigo Card Game")
+        player.unpackNewDeck(deck)
 
         while (true) {
             print("Play first? \n> ")
@@ -24,8 +24,7 @@ class Game {
             }
         }
 
-        cardDealer.putInitialCardsOnTable()
-
+        player.putInitialCardsOnTable(deck, cardsOnTheTable)
         while (!gameOver) {
             when (playFirst) {
                 "yes" -> playerIsFirst()
@@ -35,61 +34,61 @@ class Game {
         println("Game Over")
     }
     private fun playerIsFirst() {
-        if (player.cardsInHand.isEmpty()) player.takeDealtCards()
-        if (computer.cardsInHand.isEmpty()) computer.takeDealtCards()
-        if (!gameOver) playerPlay()
-        if (!gameOver) computerPlay()
+        if (player.cardsInHand.isEmpty()) player.takeDealtCards(deck)
+        if (computer.cardsInHand.isEmpty()) computer.takeDealtCards(deck)
+        if (!gameOver) playerThrowsCard()
+        if (!gameOver) computerThrowsCard()
     }
-    private fun computerIsFirst(){
-        if (computer.cardsInHand.isEmpty()) computer.takeDealtCards()
-        if (player.cardsInHand.isEmpty()) player.takeDealtCards()
-        if (!gameOver) computerPlay()
-        if (!gameOver) playerPlay()
+    private fun computerIsFirst() {
+        if (computer.cardsInHand.isEmpty()) computer.takeDealtCards(deck)
+        if (player.cardsInHand.isEmpty()) player.takeDealtCards(deck)
+        if (!gameOver) computerThrowsCard()
+        if (!gameOver) playerThrowsCard()
     }
-    private fun computerPlay() {
-        if (cardDealer.cardsOnTheTable.size < 52) {
+    private fun computerThrowsCard() {
+        if (cardsOnTheTable.size < 52) {
             println()
-            println("${cardDealer.cardsOnTheTable.size} cards on the table, and the top card is " +
-                    cardDealer.cardsOnTheTable.last())
+            println("${cardsOnTheTable.size} cards on the table, and the top card is " +
+                    cardsOnTheTable.last())
             println("Computer plays ${computer.cardsInHand.last()}")
-            cardDealer.cardsOnTheTable.add(computer.cardsInHand.last())
+            cardsOnTheTable.add(computer.cardsInHand.last())
             computer.cardsInHand.removeLast()
         } else {
             println()
-            println("${cardDealer.cardsOnTheTable.size} cards on the table, and the top card is " +
-                    cardDealer.cardsOnTheTable.last())
+            println("${cardsOnTheTable.size} cards on the table, and the top card is " +
+                    cardsOnTheTable.last())
             gameOver = true
         }
     }
-    private fun playerPlay() {
-        gameOver = if (cardDealer.cardsOnTheTable.size < 52) {
+    private fun playerThrowsCard() {
+        gameOver = if (cardsOnTheTable.size < 52) {
             println()
-            println("${cardDealer.cardsOnTheTable.size} cards on the table, and the top card is " +
-                    cardDealer.cardsOnTheTable.last())
+            println("${cardsOnTheTable.size} cards on the table, and the top card is " +
+                    cardsOnTheTable.last())
             println("Cards in hand: ${player.handForPrint.joinToString(" ")}")
-            player.throwCard()
+            player.throwCard(cardsOnTheTable)
         } else {
             println()
-            println("${cardDealer.cardsOnTheTable.size} cards on the table, and the top card is " +
-                    cardDealer.cardsOnTheTable.last())
+            println("${cardsOnTheTable.size} cards on the table, and the top card is " +
+                    cardsOnTheTable.last())
             true
         }
     }
 }
-class Player: CardDealer() {
 
+class Player : CardDealer {
     var cardsInHand = mutableListOf<String>()
     var handForPrint = mutableListOf<String>()
 
-    fun takeDealtCards() {
-        cardsInHand = cardDealer.takeSixCardsFromDeck()
+    fun takeDealtCards(deck: MutableList<String>) {
+        cardsInHand = takeSixCardsFromDeck(deck)
         for (index in 0..cardsInHand.lastIndex) {
             handForPrint.add(index, "${index + 1})${cardsInHand[index]}")
         }
     }
-    fun throwCard(): Boolean {
+    fun throwCard(cardsOnTheTable: MutableList<String>): Boolean {
         var cardNumber: String
-        var condition = gameOver
+        var condition = Game().gameOver
 
         while (true) {
             println("choose a card to play (1-${cardsInHand.size}):")
@@ -104,7 +103,7 @@ class Player: CardDealer() {
             } else {
                 if (cardNumber.toInt() in 1..cardsInHand.size) {
                     val index = cardNumber.toInt() - 1
-                    cardDealer.cardsOnTheTable.add(cardsInHand[index])
+                    cardsOnTheTable.add(cardsInHand[index])
                     cardsInHand.removeAt(index)
                     handForPrint.clear()
                     for (i in 0..cardsInHand.lastIndex) {
@@ -116,12 +115,20 @@ class Player: CardDealer() {
         }
         return condition
     }
+    private fun takeSixCardsFromDeck(deck: MutableList<String>): MutableList<String> {
+        val removedCards = mutableListOf<String>()
+        for (i in 0 until 6) {
+            if (deck.size > 0) {
+                removedCards.add(deck.last())
+                deck.remove(deck.last())
+            }
+        }
+        return removedCards
+    }
 }
-open class CardDealer {
-    private val deck = mutableListOf<String>()
-    private val startingDeck = mutableListOf<String>()
-    val cardsOnTheTable = mutableListOf<String>()
-    init {
+
+interface CardDealer {
+    fun unpackNewDeck(deck: MutableList<String>) {
         val cardRanks = listOf("A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K")
         val cardSuits = listOf("♦", "♥", "♠", "♣")
         var cardCounter = 0
@@ -132,23 +139,12 @@ open class CardDealer {
                 cardCounter++
             }
         }
-        startingDeck.addAll(deck)
     }
-    private fun shuffleDeck() {
+    fun shuffleDeck(deck: MutableList<String>) {
         deck.shuffle()
     }
-    fun takeSixCardsFromDeck(): MutableList<String> {
-        val removedCards = mutableListOf<String>()
-        for (i in 0 until 6) {
-            if (deck.size > 0) {
-                removedCards.add(deck.last())
-                deck.remove(deck.last())
-            }
-        }
-        return removedCards
-    }
-    fun putInitialCardsOnTable() {
-        shuffleDeck()
+    fun putInitialCardsOnTable(deck: MutableList<String>, cardsOnTheTable: MutableList<String>) {
+        shuffleDeck(deck)
         print("Initial cards on the table: ")
         for (i in 0 until 4) {
             print("${deck.last()} ")
