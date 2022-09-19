@@ -1,11 +1,10 @@
 package indigo
 
 class CardDeck {
-    val deck = mutableListOf<String>()
+    private val deck = mutableListOf<String>()
     private val startingDeck = mutableListOf<String>()
     val cardsOnTheTable = mutableListOf<String>()
     init {
-        println("Indigo Card Game")
         val cardRanks = listOf("A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K")
         val cardSuits = listOf("♦", "♥", "♠", "♣")
         var cardCounter = 0
@@ -18,7 +17,7 @@ class CardDeck {
         }
         startingDeck.addAll(deck)
     }
-    private fun shuffleDeck() {
+    fun shuffleDeck() {
         deck.shuffle()
     }
     fun takeSixCardsFromDeck(): MutableList<String> {

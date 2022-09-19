@@ -1,66 +1,74 @@
 package indigo
 
+val cardDealer = CardDeck()
+var gameOver = false
+
 class Game {
 
     private val player = Player()
     private val computer = Player()
     private lateinit var playFirst: String
+    var gameOver: Boolean = false
 
     fun play() {
+        println("Indigo Card Game")
 
         while (true) {
-            print("Play first? (enter yes or no): \n> ")
+            print("Play first? \n> ")
             playFirst = readln()
-            if (playFirst == "yes" || playFirst == "no") break
+            if (playFirst == "yes" || playFirst == "no" ) {
+                break
+            }
         }
-        cardDeck.putInitialCardsOnTable()
+
+        Player().putInitialCardsOnTable()
         println()
 
-        when (playFirst) {
-            "yes" -> playerIsFirst()
-            "no" -> computerIsFirst()
+        while (!gameOver) {
+            when (playFirst) {
+                "yes" -> playerIsFirst()
+                "no" -> computerIsFirst()
+            }
         }
+        println("Game Over")
     }
-
     private fun playerIsFirst() {
-        while (cardDeck.cardsOnTheTable.size < 53) {
-            if (player.cardsInHand.isEmpty()) player.takeDealtCards()
-            if (computer.cardsInHand.isEmpty()) computer.takeDealtCards()
-            playerPlay()
-            computerPlay()
-        }
+        if (player.cardsInHand.isEmpty() && !gameOver) player.takeDealtCards()
+        if (computer.cardsInHand.isEmpty() && !gameOver) computer.takeDealtCards()
+        if (!gameOver) playerPlay()
+        if (!gameOver) computerPlay()
     }
-
     private fun computerIsFirst(){
-        while (cardDeck.cardsOnTheTable.size < 53) {
-            if (computer.cardsInHand.isEmpty()) computer.takeDealtCards()
-            if (player.cardsInHand.isEmpty()) player.takeDealtCards()
-            computerPlay()
-            playerPlay()
-        }
+        if (computer.cardsInHand.isEmpty() && !gameOver) computer.takeDealtCards()
+        if (player.cardsInHand.isEmpty() && !gameOver) player.takeDealtCards()
+        if (!gameOver) computerPlay()
+        if (!gameOver) playerPlay()
     }
-
     private fun computerPlay() {
-        if (cardDeck.cardsOnTheTable.size < 53) {
-            println(
-                "${cardDeck.cardsOnTheTable.size} cards on the table, and the top card is " +
-                        cardDeck.cardsOnTheTable.last()
-            )
+        if (cardDealer.cardsOnTheTable.size < 52) {
+            println("${cardDealer.cardsOnTheTable.size} cards on the table, and the top card is " +
+                        cardDealer.cardsOnTheTable.last())
             println("Computer plays ${computer.cardsInHand.last()}")
-            cardDeck.cardsOnTheTable.add(computer.cardsInHand.last())
+            cardDealer.cardsOnTheTable.add(computer.cardsInHand.last())
             computer.cardsInHand.removeLast()
             println()
+        } else {
+            println("${cardDealer.cardsOnTheTable.size} cards on the table, and the top card is " +
+                    cardDealer.cardsOnTheTable.last())
+            gameOver = true
         }
     }
-
     private fun playerPlay() {
-        if (cardDeck.cardsOnTheTable.size < 53) {
-            println(
-                "${cardDeck.cardsOnTheTable.size} cards on the table, and the top card is " +
-                        cardDeck.cardsOnTheTable.last()
-            )
+        gameOver = if (cardDealer.cardsOnTheTable.size < 52) {
+            println("${cardDealer.cardsOnTheTable.size} cards on the table, and the top card is " +
+                    cardDealer.cardsOnTheTable.last())
             println("Cards in hand: ${player.handForPrint.joinToString(" ")}")
             player.throwCard()
+        } else {
+            println("${cardDealer.cardsOnTheTable.size} cards on the table, and the top card is " +
+                    cardDealer.cardsOnTheTable.last())
+            true
         }
     }
 }
+
