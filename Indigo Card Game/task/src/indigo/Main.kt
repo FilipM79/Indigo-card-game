@@ -5,7 +5,7 @@ fun main() {
     indigoGame.play()
 }
 class Game {
-    var gameOver = false
+    var gameOver: Boolean = false
 
     fun play() {
         val deck = mutableListOf <String>()
