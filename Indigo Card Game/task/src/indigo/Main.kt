@@ -5,7 +5,7 @@ fun main() {
     indigoGame.play()
 }
 class Game {
-    var gameOver: Boolean = false
+    var gameOver = false
 
     fun play() {
         val deck = mutableListOf <String>()
@@ -38,51 +38,57 @@ class Game {
                 "yes" -> {
                     if (player.cardsInHand.isEmpty()) player.takeDealtCards(deck)
                     if (computer.cardsInHand.isEmpty()) computer.takeDealtCards(deck)
-                    if (!gameOver) playerThrowsCard(computer, tableCards)
-                    if (!gameOver) computerThrowsCard(player, tableCards)
+                    if (!gameOver) playerPlay(computer, tableCards)
+                    if (!gameOver) computerPlay(player, tableCards)
                 }
                 "no" -> {
                     if (computer.cardsInHand.isEmpty()) computer.takeDealtCards(deck)
                     if (player.cardsInHand.isEmpty()) player.takeDealtCards(deck)
-                    if (!gameOver) computerThrowsCard(player, tableCards)
-                    if (!gameOver) playerThrowsCard(player, tableCards)
+                    if (!gameOver) computerPlay(player, tableCards)
+                    if (!gameOver) playerPlay(player, tableCards)
                 }
             }
         }
 
     }
-    private fun computerThrowsCard(computer: Player, cardsOnTheTable: MutableList<String>) {
-        if (cardsOnTheTable.size < 52) {
+    private fun computerPlay(computer: Player, tableCards: MutableList<String>) {
+        val computerWinStack = mutableListOf<String>()
+
+        if (tableCards.size < 52) {
             println()
-            println("${cardsOnTheTable.size} cards on the table, and the top card is " +
-                    cardsOnTheTable.last())
-            println("Computer plays ${computer.cardsInHand.last()}")
-            cardsOnTheTable.add(computer.cardsInHand.last())
-            computer.cardsInHand.removeLast()
+            println("${tableCards.size} cards on the table, and the top card is " +
+                    tableCards.last())
+
+            val cardToThrow = computer.chooseCard(tableCards, computer.cardsInHand)
+
+            println("Computer plays $cardToThrow")
+            computer.winOrNot(computer, computerWinStack, tableCards, cardToThrow)
+            println("Cards on the table: $tableCards")
+
         } else {
             println()
-            println("${cardsOnTheTable.size} cards on the table, and the top card is " +
-                    cardsOnTheTable.last())
+            println("${tableCards.size} cards on the table, and the top card is " +
+                    tableCards.last())
             gameOver = true
         }
     }
-    private fun playerThrowsCard(player: Player, cardsOnTheTable: MutableList<String>) {
-        gameOver = if (cardsOnTheTable.size < 52) {
+    private fun playerPlay(player: Player, tableCards: MutableList<String>) {
+        gameOver = if (tableCards.size < 52) {
             println()
-            println("${cardsOnTheTable.size} cards on the table, and the top card is " +
-                    cardsOnTheTable.last())
+            println("${tableCards.size} cards on the table, and the top card is " +
+                    tableCards.last())
             println("Cards in hand: ${player.handForPrint.joinToString(" ")}")
-            player.throwCard(cardsOnTheTable)
+            player.throwCard(tableCards)
         } else {
             println()
-            println("${cardsOnTheTable.size} cards on the table, and the top card is " +
-                    cardsOnTheTable.last())
+            println("${tableCards.size} cards on the table, and the top card is " +
+                    tableCards.last())
             true
         }
     }
 }
 
-class Player : CardDealer {
+class Player : GameLogic(), CardDealer {
     var cardsInHand = mutableListOf<String>()
     var handForPrint = mutableListOf<String>()
 
@@ -92,7 +98,7 @@ class Player : CardDealer {
             handForPrint.add(index, "${index + 1})${cardsInHand[index]}")
         }
     }
-    fun throwCard(cardsOnTheTable: MutableList<String>): Boolean {
+    fun throwCard(tableCards: MutableList<String>): Boolean {
         var cardNumber: String
         var condition = Game().gameOver
 
@@ -109,7 +115,7 @@ class Player : CardDealer {
             } else {
                 if (cardNumber.toInt() in 1..cardsInHand.size) {
                     val index = cardNumber.toInt() - 1
-                    cardsOnTheTable.add(cardsInHand[index])
+                    tableCards.add(cardsInHand[index])
                     cardsInHand.removeAt(index)
                     handForPrint.clear()
                     for (i in 0..cardsInHand.lastIndex) {
@@ -157,5 +163,77 @@ interface CardDealer {
             deck.remove(deck.last())
         }
         println()
+    }
+}
+
+abstract class GameLogic {
+    private var win = false
+
+    fun chooseCard(tableCards: MutableList<String>, cardsInHand: MutableList<String>): String {
+        val points = listOf("A", "10", "J", "Q", "K")
+        val tableCardRank = tableCards.last().substring(0, tableCards.last().lastIndex)
+        val tableCardSign = tableCards.last().last()
+        val pointCardOnTable = points.contains(tableCardRank)
+        var cardToThrow = ""
+
+        println("c-hand: $cardsInHand")
+
+        loop@ for (i in 0..cardsInHand.lastIndex) {
+            val cardRank = cardsInHand[i].substring(0, cardsInHand[i].lastIndex)
+            val cardSign = cardsInHand[i].last()
+            val sameRank = cardRank == tableCardRank
+            val sameSign = cardSign == tableCardSign
+
+            if (pointCardOnTable && sameRank) {
+                if (cardToThrow.isNotEmpty() && points.contains(cardToThrow)) {
+                    continue
+                } else {
+                    win = true
+                    cardToThrow = cardsInHand[i]
+                    break@loop
+                }
+            } else if (sameSign || sameRank) {
+                if (win && !points.contains(cardToThrow)) {
+                    continue
+                } else {
+                    win = true
+                    cardToThrow = cardsInHand[i]
+                    break@loop
+                }
+            } else {
+                if (win) {
+                    continue
+                } else {
+                    win = false
+
+                    for (j in 0..cardsInHand.lastIndex) {
+                        if (!points.contains(cardRank)) {
+
+                            cardToThrow = cardsInHand.last()
+                            if (cardToThrow.substring(0, cardToThrow.lastIndex) < cardRank) {
+                                cardToThrow = cardsInHand[j]
+                            } else {
+                                continue
+                            }
+
+                        } else {
+                            cardToThrow = cardsInHand.last()
+                        }
+                    }
+                }
+            }
+        }
+        return cardToThrow
+    }
+    fun winOrNot(anyPlayer: Player, winStack: MutableList<String>, table: MutableList<String>, cardToThrow: String) {
+        if (win) {
+            table.add(cardToThrow)
+            winStack.addAll(table)
+            table.clear()
+            anyPlayer.cardsInHand.remove(cardToThrow)
+        } else {
+            table.add(cardToThrow)
+            anyPlayer.cardsInHand.remove(cardToThrow)
+        }
     }
 }
