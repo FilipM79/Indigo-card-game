@@ -6,6 +6,7 @@ abstract class GameLogic {
     fun chooseCard(table: MutableList<String>, cardsInHand: MutableList<String>): String {
         val points = listOf("A", "10", "J", "Q", "K")
         var cardToThrow = cardsInHand.last()
+//        println("c-hand: $cardsInHand")
 
         if (table.isEmpty()) {
             for (k in 0..cardsInHand.lastIndex) {

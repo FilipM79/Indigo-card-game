@@ -16,11 +16,11 @@ interface CardDealer {
     fun shuffleDeck(deck: MutableList<String>) {
         deck.shuffle()
     }
-    fun putInitialCardsOnTable(deck: MutableList<String>, cardsOnTheTable: MutableList<String>) {
+    fun putInitialCardsOnTable(deck: MutableList<String>, table: MutableList<String>) {
         print("Initial cards on the table: ")
         for (i in 0 until 4) {
             print("${deck.last()} ")
-            cardsOnTheTable.add(deck.last())
+            table.add(deck.last())
             deck.remove(deck.last())
         }
         println()
