@@ -124,6 +124,10 @@ class Game {
     private fun computerPlay(): Boolean {
 
         var gameOver = false
+        val cardRank: String
+        val cardSign: String
+        val tableRank: String
+        val tableSign: String
 
         if (table.isEmpty() && playerWinStack.size + computerWinStack.size < 52 && cardToThrow != "exit") {
 
@@ -143,10 +147,10 @@ class Game {
             cardToThrow = computer.chooseCard(table, computer.cardsInHand)
             println("Computer plays $cardToThrow")
 
-            val cardRank = cardToThrow.substring(0, cardToThrow.lastIndex)
-            val cardSign = cardToThrow.last()
-            val tableRank = table.last().substring(0, table.last().lastIndex)
-            val tableSign = table.last().last()
+            cardRank = cardToThrow.substring(0, cardToThrow.lastIndex)
+            cardSign = cardToThrow.last().toString()
+            tableRank = table.last().substring(0, table.last().lastIndex)
+            tableSign = table.last().last().toString()
 
             if (tableRank == cardRank || tableSign == cardSign) {
                 table.add(cardToThrow)
@@ -159,25 +163,21 @@ class Game {
                 computer.cardsInHand.remove(cardToThrow)
             }
 
-        } else if ((player.cardsInHand.isEmpty() || computer.cardsInHand.isEmpty()) && deck.size == 0) {
+        } else if ((player.cardsInHand.size <= 1 || computer.cardsInHand.size <= 1) && deck.size == 0) {
 
             if(whoWonLast == "computer") {
-                println("C1")
                 computerWinStack.addAll(table)
                 gameOver = true
 
             } else if (whoWonLast == "player") {
-                println("C2")
                 playerWinStack.addAll(table)
                 gameOver = true
 
             } else if (playFirst == "yes") {
-                println("C3")
                 playerWinStack.addAll(table)
                 gameOver = true
 
             } else if (playFirst == "no") {
-                println("C4")
                 computerWinStack.addAll(table)
                 gameOver = true
             }
@@ -188,6 +188,8 @@ class Game {
 
         val tableRank: String
         val tableSign: String
+        val cardRank: String
+        val cardSign: String
         var gameOver = false
         val stack = computerWinStack.size + playerWinStack.size
 
@@ -214,8 +216,8 @@ class Game {
             if (cardToThrow == "exit") {
                 gameOver = true
             } else {
-                val cardRank: String = cardToThrow.substring(0, cardToThrow.lastIndex)
-                val cardSign: String = cardToThrow.last().toString()
+                cardRank = cardToThrow.substring(0, cardToThrow.lastIndex)
+                cardSign = cardToThrow.last().toString()
                 tableRank = table.last().substring(0, table.last().lastIndex)
                 tableSign = table.last().last().toString()
 
@@ -231,25 +233,21 @@ class Game {
                 }
             }
 
-        } else if ((computer.cardsInHand.isEmpty() || player.cardsInHand.isEmpty()) && deck.isEmpty()) {
+        } else if ((computer.cardsInHand.size <= 1 || player.cardsInHand.size <= 1) && deck.isEmpty()) {
 
             if(whoWonLast == "player") {
-                println("P1")
                 playerWinStack.addAll(table)
                 gameOver = true
 
             } else if (whoWonLast == "computer") {
-                println("P2")
                 computerWinStack.addAll(table)
                 gameOver = true
 
             } else if (playFirst == "yes") {
-                println("P3")
                 playerWinStack.addAll(table)
                 gameOver = true
 
             } else if (playFirst == "no") {
-                println("P4")
                 computerWinStack.addAll(table)
                 gameOver = true
             }
@@ -283,10 +281,7 @@ class Player : GameLogic(), CardDealer {
                 Game().gameOver = true
                 break@loop
 
-            } else if (cardNumber.isEmpty() || cardNumber.any {!it.isDigit()})  {
-                continue
-
-            } else {
+            } else if (cardNumber.any {it.isDigit()})  {
                 if (cardNumber.toInt() in 1..cardsInHand.size) {
                     val index = cardNumber.toInt() - 1
                     cardToThrow = cardsInHand[index]
@@ -298,6 +293,8 @@ class Player : GameLogic(), CardDealer {
                     }
                     break
                 }
+            } else {
+                continue
             }
         }
         return cardToThrow
