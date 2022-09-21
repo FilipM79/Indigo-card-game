@@ -6,6 +6,7 @@ fun main() {
 }
 
 class Game {
+
     var gameOver = false
     private val deck = mutableListOf <String>()
     private val table =  mutableListOf <String>()
@@ -13,6 +14,12 @@ class Game {
     private var computerScore = 0
     private var playerCards = 0
     private var computerCards = 0
+
+    private val player = Player()
+    private val computer = Player()
+    private val computerWinStack = mutableListOf<String>()
+    private val playerWinStack = mutableListOf<String>()
+    private var totalWinStackSize = 0
 
     fun play() {
 
@@ -50,94 +57,56 @@ class Game {
     }
     private fun orderOfMoves(playFirst: String) {
 
-        val player = Player()
-        val computer = Player()
-        val computerWinStack = mutableListOf<String>()
-        val playerWinStack = mutableListOf<String>()
-        var totalWinStackSize: Int
-
         mainLoop@ while (!gameOver) {
             when (playFirst) {
                 "yes" -> {
-                    if (player.cardsInHand.isEmpty()) player.takeDealtCards(deck)
-                    if (computer.cardsInHand.isEmpty()) computer.takeDealtCards(deck)
-
-                    if (!gameOver) {
-                        gameOver = playerPlay(player, playerWinStack, computerWinStack.size)
-                        playerCards = playerWinStack.size
-                        playerScore = score(playerWinStack)
-                        totalWinStackSize = computerWinStack.size + playerWinStack.size
-
-                        if (table.isEmpty() && totalWinStackSize < 52) {
-                            println("Player wins cards")
-                            println("Score: Player $playerScore - Computer $computerScore")
-                            println("Cards: Player $playerCards - Computer $computerCards")
-                        }
-
-                    } else {
-                        break@mainLoop
-                    }
-
-                    if (!gameOver) {
-                        gameOver = computerPlay(computer, computerWinStack, playerWinStack.size)
-                        computerCards = computerWinStack.size
-                        computerScore = score(computerWinStack)
-                        totalWinStackSize = computerWinStack.size + playerWinStack.size
-
-                        if (table.isEmpty() && totalWinStackSize < 52) {
-                            println("Computer wins cards")
-                            println("Score: Player $playerScore - Computer $computerScore")
-                            println("Cards: Player $playerCards - Computer $computerCards")
-                        }
-
-                    } else break@mainLoop
+                    playerIsOnTheMove()
+                    if (!gameOver) computerIsOnTheMove() else break@mainLoop
                 }
 
                 "no" -> {
-                    if (computer.cardsInHand.isEmpty()) computer.takeDealtCards(deck)
-                    if (player.cardsInHand.isEmpty()) player.takeDealtCards(deck)
-
-                    if (!gameOver) {
-                        gameOver = computerPlay(computer,computerWinStack,playerWinStack.size)
-                        computerCards = computerWinStack.size
-                        computerScore = score(computerWinStack)
-                        totalWinStackSize = computerWinStack.size + playerWinStack.size
-
-                        if (table.isEmpty() && totalWinStackSize < 52) {
-                            println("Computer wins cards")
-                            println("Score: Player $playerScore - Computer $computerScore")
-                            println("Cards: Player $playerCards - Computer $computerCards")
-                        }
-
-                    } else break@mainLoop
-
-                    if (!gameOver) {
-                        gameOver = playerPlay(player, playerWinStack, computerWinStack.size)
-                        playerCards = playerWinStack.size
-                        playerScore = score(playerWinStack)
-                        totalWinStackSize = computerWinStack.size + playerWinStack.size
-
-                        if (table.isEmpty() && totalWinStackSize < 52) {
-                            println("Player wins cards")
-                            println("Score: Player $playerScore - Computer $computerScore")
-                            println("Cards: Player $playerCards - Computer $computerCards")
-                        }
-
-                    } else break@mainLoop
+                    computerIsOnTheMove()
+                    if (!gameOver) playerIsOnTheMove() else break@mainLoop
                 }
             }
+        }
+    }
+    private fun computerIsOnTheMove() {
+        if (computer.cardsInHand.isEmpty()) computer.takeDealtCards(deck)
+
+        gameOver = computerPlay(computer, computerWinStack, playerWinStack.size)
+        computerCards = computerWinStack.size
+        computerScore = score(computerWinStack)
+        totalWinStackSize = computerWinStack.size + playerWinStack.size
+
+        if (table.isEmpty() && totalWinStackSize < 52) {
+            println("Computer wins cards")
+            println("Score: Player $playerScore - Computer $computerScore")
+            println("Cards: Player $playerCards - Computer $computerCards")
+        }
+    }
+    private fun playerIsOnTheMove() {
+        if (player.cardsInHand.isEmpty()) player.takeDealtCards(deck)
+
+        gameOver = playerPlay(player, playerWinStack, computerWinStack.size)
+        playerCards = playerWinStack.size
+        playerScore = score(playerWinStack)
+        totalWinStackSize = computerWinStack.size + playerWinStack.size
+
+        if (table.isEmpty() && totalWinStackSize < 52) {
+            println("Player wins cards")
+            println("Score: Player $playerScore - Computer $computerScore")
+            println("Cards: Player $playerCards - Computer $computerCards")
         }
     }
     private fun score (winStack: MutableList<String>): Int {
 
         var score = 0
-
         for (card in winStack) {
             val points = listOf("A", "10", "J", "Q", "K")
             val cardRank = card.substring(0, card.lastIndex)
 
             if (points.contains(cardRank)) score++
-
         }
         return score
     }
