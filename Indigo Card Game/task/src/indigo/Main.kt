@@ -53,14 +53,16 @@ class Game {
             }
         }
 
-        println()
-        if (table.isEmpty()) {
-            println("No cards on the table")
-        } else {
-            println("${table.size} cards on the table, and the top card is ${table.last()}")
+        if (cardToThrow != "exit") {
+            println()
+            if (table.isEmpty()) {
+                println("No cards on the table")
+            } else {
+                println("${table.size} cards on the table, and the top card is ${table.last()}")
+            }
+            println("Score: Player $playerScore - Computer $computerScore")
+            println("Cards: Player $playerCards - Computer $computerCards")
         }
-        println("Score: Player $playerScore - Computer $computerScore")
-        println("Cards: Player $playerCards - Computer $computerCards")
         println("Game Over")
     }
     private fun orderOfMoves() {
@@ -159,29 +161,27 @@ class Game {
 
         } else if ((player.cardsInHand.isEmpty() || computer.cardsInHand.isEmpty()) && deck.size == 0) {
 
-            when(whoWonLast) {
-                "computer" -> {
-                    computerWinStack.addAll(table)
-                    gameOver = true
-                }
+            if(whoWonLast == "computer") {
+                println("C1")
+                computerWinStack.addAll(table)
+                gameOver = true
 
-                "player" -> {
-                    playerWinStack.addAll(table)
-                    gameOver = true
-                }
+            } else if (whoWonLast == "player") {
+                println("C2")
+                playerWinStack.addAll(table)
+                gameOver = true
 
-                else -> {
-                    if (playFirst == "yes") {
-                        playerWinStack.addAll(table)
-                        gameOver = true
-                    } else if (playFirst == "no") {
-                        computerWinStack.addAll(table)
-                        gameOver = true
-                    }
-                }
+            } else if (playFirst == "yes") {
+                println("C3")
+                playerWinStack.addAll(table)
+                gameOver = true
+
+            } else if (playFirst == "no") {
+                println("C4")
+                computerWinStack.addAll(table)
+                gameOver = true
             }
         }
-
         return gameOver
     }
     private fun playerPlay(): Boolean {
@@ -233,26 +233,25 @@ class Game {
 
         } else if ((computer.cardsInHand.isEmpty() || player.cardsInHand.isEmpty()) && deck.isEmpty()) {
 
-            when(whoWonLast) {
-                "player" -> {
-                    playerWinStack.addAll(table)
-                    gameOver = true
-                }
+            if(whoWonLast == "player") {
+                println("P1")
+                playerWinStack.addAll(table)
+                gameOver = true
 
-                "computer" -> {
-                    computerWinStack.addAll(table)
-                    gameOver = true
-                }
+            } else if (whoWonLast == "computer") {
+                println("P2")
+                computerWinStack.addAll(table)
+                gameOver = true
 
-                else -> {
-                    if (playFirst == "yes") {
-                        playerWinStack.addAll(table)
-                        gameOver = true
-                    } else if (playFirst == "no") {
-                        playerWinStack.addAll(table)
-                        gameOver = true
-                    }
-                }
+            } else if (playFirst == "yes") {
+                println("P3")
+                playerWinStack.addAll(table)
+                gameOver = true
+
+            } else if (playFirst == "no") {
+                println("P4")
+                computerWinStack.addAll(table)
+                gameOver = true
             }
         }
         return gameOver
