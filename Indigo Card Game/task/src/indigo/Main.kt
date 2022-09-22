@@ -1,6 +1,7 @@
 package indigo
 
 fun main() {
+
     val indigoGame = Game()
     indigoGame.play()
 }
@@ -21,7 +22,8 @@ class Game {
 
         while (true) {
             print("Play first? \n> ")
-            playFirst = readln()
+//            playFirst = readln()
+            playFirst = "no"
             if (playFirst == "yes" || playFirst == "no") {
                 break
             }
@@ -126,7 +128,7 @@ class Game {
             println()
             println("No cards on the table")
 
-            computer.cardToThrow = computer.chooseCard(table, computer.cardsInHand)
+            computer.cardToThrow = computer.chooseCard(table = table, cardsInHand = computer.cardsInHand)
             println("Computer plays ${computer.cardToThrow}")
 
             table.add(computer.cardToThrow)
@@ -136,7 +138,7 @@ class Game {
             println()
             println("${table.size} cards on the table, and the top card is ${table.last()}")
 
-            computer.cardToThrow = computer.chooseCard(table, computer.cardsInHand)
+            computer.cardToThrow = computer.chooseCard(table = table, cardsInHand = computer.cardsInHand)
             println("Computer plays ${computer.cardToThrow}")
 
             cardRank = computer.cardToThrow.substring(0, computer.cardToThrow.lastIndex)
@@ -257,7 +259,7 @@ class Player : GameLogic(), CardDealer {
     var cardToThrow = ""
 
     fun takeDealtCards(deck: MutableList<String>) {
-        cardsInHand = sixCardsFromDeck(deck)
+        cardsInHand = sixCardsFromDeck(deck = deck)
 
         for (index in 0..cardsInHand.lastIndex) {
             handForPrint.add(index, "${index + 1})${cardsInHand[index]}")
