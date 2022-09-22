@@ -9,21 +9,10 @@ class Game {
 
     var gameOver = false
     private val deck = mutableListOf <String>()
-    private val table =  mutableListOf <String>()
-    private var playerScore = 0
-    private var computerScore = 0
-    private var playerCards = 0
-    private var computerCards = 0
+    private val table = mutableListOf <String>()
 
-    private val player = Player()
-    private val computer = Player()
-    private val computerWinStack = mutableListOf<String>()
-    private val playerWinStack = mutableListOf<String>()
-    private var totalWinStackSize = 0
     private var whoWonLast = ""
     private var playFirst = ""
-
-    private var cardToThrow = ""
 
     fun play() {
 
@@ -38,76 +27,79 @@ class Game {
             }
         }
 
-        Player().shuffleDeck(deck)
-        Player().putInitialCardsOnTable(deck, table)
-        orderOfMoves()
+        Player().shuffleDeck(deck = deck)
+        Player().putInitialCardsOnTable(deck = deck, table = table)
 
-        if (computerCards > playerCards)  {
-            computerScore += 3
-        } else if (playerCards > computerCards){
-            playerScore += 3
+        val player = Player()
+        val computer = Player()
+
+        orderOfMoves(player = player, computer = computer)
+
+        if (computer.winStack.size > player.winStack.size )  {
+            computer.score += 3
+        } else if (player.winStack.size  > computer.winStack.size ){
+            player.score += 3
         } else {
             when(playFirst) {
-                "yes" -> playerScore += 3
-                "no" -> computerScore += 3
+                "yes" -> player.score += 3
+                "no" -> computer.score += 3
             }
         }
 
-        if (cardToThrow != "exit") {
+        if (player.cardToThrow != "exit" && computer.cardToThrow != "exit") {
             println()
             if (table.isEmpty()) {
                 println("No cards on the table")
             } else {
                 println("${table.size} cards on the table, and the top card is ${table.last()}")
             }
-            println("Score: Player $playerScore - Computer $computerScore")
-            println("Cards: Player $playerCards - Computer $computerCards")
+            println("Score: Player ${player.score} - Computer ${computer.score}")
+            println("Cards: Player ${player.winStack.size} - Computer ${computer.winStack.size}")
         }
         println("Game Over")
     }
-    private fun orderOfMoves() {
+    private fun orderOfMoves(player: Player, computer: Player) {
 
         mainLoop@ while (true) {
             when (playFirst) {
                 "yes" -> {
-                    if (!gameOver) playerIsOnTheMove() else break@mainLoop
-                    if (!gameOver) computerIsOnTheMove() else break@mainLoop
+                    if (!gameOver) playerIsOnTheMove(player = player, computer = computer) else break@mainLoop
+                    if (!gameOver) computerIsOnTheMove(player = player, computer = computer) else break@mainLoop
                 }
 
                 "no" -> {
-                    if (!gameOver) computerIsOnTheMove() else break@mainLoop
-                    if (!gameOver) playerIsOnTheMove() else break@mainLoop
+                    if (!gameOver) computerIsOnTheMove(player = player, computer = computer) else break@mainLoop
+                    if (!gameOver) playerIsOnTheMove(player = player, computer = computer) else break@mainLoop
 
                 }
             }
         }
     }
-    private fun computerIsOnTheMove() {
+    private fun computerIsOnTheMove(player: Player, computer: Player) {
         if (computer.cardsInHand.isEmpty()) computer.takeDealtCards(deck)
 
-        gameOver = computerPlay()
-        computerCards = computerWinStack.size
-        computerScore = score(computerWinStack)
-        totalWinStackSize = computerWinStack.size + playerWinStack.size + table.size
+        gameOver = computerPlay(player = player, computer = computer)
+        computer.score = score(computer.winStack)
+        val totalWinStackSize = computer.winStack.size + player.winStack.size + table.size
 
-        if (table.isEmpty() && totalWinStackSize < 52 && cardToThrow != "exit") {
+        if (table.isEmpty() && totalWinStackSize < 52 && computer.cardToThrow != "exit") {
             println("Computer wins cards")
-            println("Score: Player $playerScore - Computer $computerScore")
-            println("Cards: Player $playerCards - Computer $computerCards")
+            println("Score: Player ${player.score} - Computer ${computer.score}")
+            println("Cards: Player ${player.winStack.size} - Computer ${computer.winStack.size}")
         }
     }
-    private fun playerIsOnTheMove() {
+    private fun playerIsOnTheMove(player: Player, computer: Player) {
+
         if (player.cardsInHand.isEmpty()) player.takeDealtCards(deck)
 
-        gameOver = playerPlay()
-        playerCards = playerWinStack.size
-        playerScore = score(playerWinStack)
-        totalWinStackSize = computerWinStack.size + playerWinStack.size + table.size
+        gameOver = playerPlay(player = player, computer = computer)
+        player.score = score(winStack = player.winStack)
+        val totalWinStackSize = computer.winStack.size + player.winStack.size + table.size
 
-        if (table.isEmpty() && totalWinStackSize < 52 && cardToThrow != "exit") {
+        if (table.isEmpty() && totalWinStackSize < 52 && player.cardToThrow != "exit") {
             println("Player wins cards")
-            println("Score: Player $playerScore - Computer $computerScore")
-            println("Cards: Player $playerCards - Computer $computerCards")
+            println("Score: Player ${player.score} - Computer ${computer.score}")
+            println("Cards: Player ${player.winStack.size} - Computer ${computer.winStack.size}")
         }
     }
     private fun score (winStack: MutableList<String>): Int {
@@ -121,7 +113,7 @@ class Game {
         }
         return score
     }
-    private fun computerPlay(): Boolean {
+    private fun computerPlay(player: Player, computer: Player): Boolean {
 
         var gameOver = false
         val cardRank: String
@@ -129,81 +121,82 @@ class Game {
         val tableRank: String
         val tableSign: String
 
-        if (table.isEmpty() && playerWinStack.size + computerWinStack.size < 52 && cardToThrow != "exit") {
+        if (table.isEmpty() && player.winStack.size + computer.winStack.size < 52 && computer.cardToThrow != "exit") {
 
             println()
             println("No cards on the table")
 
-            cardToThrow = computer.chooseCard(table, computer.cardsInHand)
-            println("Computer plays $cardToThrow")
+            computer.cardToThrow = computer.chooseCard(table, computer.cardsInHand)
+            println("Computer plays ${computer.cardToThrow}")
 
-            table.add(cardToThrow)
-            computer.cardsInHand.remove(cardToThrow)
+            table.add(computer.cardToThrow)
+            computer.cardsInHand.remove(computer.cardToThrow)
 
-        } else if (playerWinStack.size + computerWinStack.size + table.size < 52 && cardToThrow != "exit") {
+        } else if (player.winStack.size + computer.winStack.size + table.size < 52 && computer.cardToThrow != "exit") {
             println()
             println("${table.size} cards on the table, and the top card is ${table.last()}")
 
-            cardToThrow = computer.chooseCard(table, computer.cardsInHand)
-            println("Computer plays $cardToThrow")
+            computer.cardToThrow = computer.chooseCard(table, computer.cardsInHand)
+            println("Computer plays ${computer.cardToThrow}")
 
-            cardRank = cardToThrow.substring(0, cardToThrow.lastIndex)
-            cardSign = cardToThrow.last().toString()
+            cardRank = computer.cardToThrow.substring(0, computer.cardToThrow.lastIndex)
+            cardSign = computer.cardToThrow.last().toString()
             tableRank = table.last().substring(0, table.last().lastIndex)
             tableSign = table.last().last().toString()
 
             if (tableRank == cardRank || tableSign == cardSign) {
-                table.add(cardToThrow)
-                computerWinStack.addAll(table)
+                table.add(computer.cardToThrow)
+                computer.winStack.addAll(table)
                 table.clear()
-                computer.cardsInHand.remove(cardToThrow)
+                computer.cardsInHand.remove(computer.cardToThrow)
                 whoWonLast = "computer"
             } else {
-                table.add(cardToThrow)
-                computer.cardsInHand.remove(cardToThrow)
+                table.add(computer.cardToThrow)
+                computer.cardsInHand.remove(computer.cardToThrow)
             }
+
 
         } else if ((player.cardsInHand.size <= 1 || computer.cardsInHand.size <= 1) && deck.size == 0) {
 
             if(whoWonLast == "computer") {
-                computerWinStack.addAll(table)
+                computer.winStack.addAll(table)
                 gameOver = true
 
             } else if (whoWonLast == "player") {
-                playerWinStack.addAll(table)
+                player.winStack.addAll(table)
                 gameOver = true
 
             } else if (playFirst == "yes") {
-                playerWinStack.addAll(table)
+                player.winStack.addAll(table)
                 gameOver = true
 
             } else if (playFirst == "no") {
-                computerWinStack.addAll(table)
+                computer.winStack.addAll(table)
                 gameOver = true
             }
         }
         return gameOver
     }
-    private fun playerPlay(): Boolean {
+    private fun playerPlay(player: Player, computer: Player): Boolean {
 
         val tableRank: String
         val tableSign: String
         val cardRank: String
         val cardSign: String
         var gameOver = false
-        val stack = computerWinStack.size + playerWinStack.size
+        val stack = computer.winStack.size + player.winStack.size
 
         if (table.isEmpty() && stack < 52) {
             println()
             println("No cards on the table")
             println("Cards in hand: ${player.handForPrint.joinToString(" ")}")
 
-            cardToThrow = player.playerThrowCard()
+            player.cardToThrow = player.playerThrowCard()
 
-            if (cardToThrow == "exit") {
+            if (player.cardToThrow == "exit") {
                 gameOver = true
             } else {
-                table.add(cardToThrow)
+                table.add(player.cardToThrow)
             }
 
         } else if (stack + table.size < 52) {
@@ -211,44 +204,44 @@ class Game {
             println("${table.size} cards on the table, and the top card is ${table.last()}")
             println("Cards in hand: ${player.handForPrint.joinToString(" ")}")
 
-            cardToThrow = player.playerThrowCard()
+            player.cardToThrow = player.playerThrowCard()
 
-            if (cardToThrow == "exit") {
+            if (player.cardToThrow == "exit") {
                 gameOver = true
             } else {
-                cardRank = cardToThrow.substring(0, cardToThrow.lastIndex)
-                cardSign = cardToThrow.last().toString()
+                cardRank = player.cardToThrow.substring(0, player.cardToThrow.lastIndex)
+                cardSign = player.cardToThrow.last().toString()
                 tableRank = table.last().substring(0, table.last().lastIndex)
                 tableSign = table.last().last().toString()
 
                 if (tableRank == cardRank || tableSign == cardSign) {
-                    table.add(cardToThrow)
-                    playerWinStack.addAll(table)
+                    table.add(player.cardToThrow)
+                    player.winStack.addAll(table)
                     table.clear()
-                    player.cardsInHand.remove(cardToThrow)
+                    player.cardsInHand.remove(player.cardToThrow)
                     whoWonLast = "player"
                 } else {
-                    table.add(cardToThrow)
-                    player.cardsInHand.remove(cardToThrow)
+                    table.add(player.cardToThrow)
+                    player.cardsInHand.remove(player.cardToThrow)
                 }
             }
 
         } else if ((computer.cardsInHand.size <= 1 || player.cardsInHand.size <= 1) && deck.isEmpty()) {
 
             if(whoWonLast == "player") {
-                playerWinStack.addAll(table)
+                player.winStack.addAll(table)
                 gameOver = true
 
             } else if (whoWonLast == "computer") {
-                computerWinStack.addAll(table)
+                computer.winStack.addAll(table)
                 gameOver = true
 
             } else if (playFirst == "yes") {
-                playerWinStack.addAll(table)
+                player.winStack.addAll(table)
                 gameOver = true
 
             } else if (playFirst == "no") {
-                computerWinStack.addAll(table)
+                computer.winStack.addAll(table)
                 gameOver = true
             }
         }
@@ -259,6 +252,9 @@ class Game {
 class Player : GameLogic(), CardDealer {
     var cardsInHand = mutableListOf<String>()
     var handForPrint = mutableListOf<String>()
+    var score = 0
+    val winStack = mutableListOf<String>()
+    var cardToThrow = ""
 
     fun takeDealtCards(deck: MutableList<String>) {
         cardsInHand = sixCardsFromDeck(deck)
