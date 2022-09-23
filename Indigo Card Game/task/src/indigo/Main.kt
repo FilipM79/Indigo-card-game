@@ -22,13 +22,14 @@ class Game {
 
         while (true) {
             print("Play first? \n> ")
-//            playFirst = readln()
-            playFirst = "no"
+            playFirst = readln()
+//            playFirst = "no"
             if (playFirst == "yes" || playFirst == "no") {
                 break
             }
         }
 
+        Player().shuffleDeck(deck = deck)
         Player().shuffleDeck(deck = deck)
         Player().putInitialCardsOnTable(deck = deck, table = table)
 
@@ -251,7 +252,7 @@ class Game {
     }
 }
 
-class Player : GameLogicc(), CardDealer {
+class Player : GameLogic(), CardDealer {
     var cardsInHand = mutableListOf<String>()
     var handForPrint = mutableListOf<String>()
     var score = 0
