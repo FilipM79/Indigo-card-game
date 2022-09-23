@@ -251,7 +251,7 @@ class Game {
     }
 }
 
-class Player : GameLogic(), CardDealer {
+class Player : GameLogicc(), CardDealer {
     var cardsInHand = mutableListOf<String>()
     var handForPrint = mutableListOf<String>()
     var score = 0
