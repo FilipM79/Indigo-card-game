@@ -11,56 +11,71 @@ abstract class GameLogic {
 
         println(cardsInHand.joinToString(" "))
 
-        val mapOfPointCards = mutableMapOf<String, Int>()
-        val mapOfOtherCards = mutableMapOf<String, Int>()
-        val mapOfAllCards = mutableMapOf<String, Int>()
-        val pointCards = mutableListOf<String>()
-        val allCardSigns = hashSetOf<String>()
-        val pointCardSigns = mutableListOf<String>()
-        val otherCardSigns = mutableListOf<String>()
-        val otherCards = mutableListOf<String>()
+        val mapAllCardsBySign = mutableMapOf<String, Int>()
+        val mapPointCardsBySign = mutableMapOf<String, Int>()
+        val mapOtherCardsBySign = mutableMapOf<String, Int>()
+        val mapAllCardsByRank = mutableMapOf<String, Int>()
+        val mapPointCardsByRank = mutableMapOf<String, Int>()
+        val mapOtherCardsByRank = mutableMapOf<String, Int>()
+
         var preferredPointCardSign = ""
         var preferredOtherCardSign = ""
         var preferredAllCardSign = ""
-        val allCardsRanks = mutableListOf<String>()
+        var preferredPointCardRank = ""
+        var preferredOtherCardRank = ""
+        var preferredAllCardRank = ""
+
+        val pointCards = mutableListOf<String>()
+        val otherCards = mutableListOf<String>()
+
+        val allCardRanks = mutableListOf<String>()
+        val pointCardRanks = mutableListOf<String>()
+        val otherCardRanks = mutableListOf<String>()
+
+        val allCardSigns = mutableListOf<String>()
+        val pointCardSigns = mutableListOf<String>()
+        val otherCardSigns = mutableListOf<String>()
 
         for (card in cardsInHand) {
             val cardRank = card.substring(0, card.lastIndex)
             val cardSign = card.last().toString()
 
-            allCardsRanks.add(card.substring(0, card.lastIndex))
+            allCardRanks.add(cardRank)
             allCardSigns.add(cardSign)
 
             if (points.contains(cardRank)) {
                 pointCards.add(card)
                 pointCardSigns.add(cardSign)
+                pointCardRanks.add(cardRank)
             } else {
                 otherCards.add(card)
                 otherCardSigns.add(cardSign)
+                otherCardRanks.add(cardRank)
             }
         }
 
-        for (i in allCardSigns.distinct()) mapOfAllCards[i] = Collections.frequency(allCardSigns, i)
-        for (i in pointCardSigns.distinct()) mapOfPointCards[i] = Collections.frequency(pointCardSigns, i)
-        for (i in otherCardSigns.distinct()) mapOfOtherCards[i] = Collections.frequency(otherCardSigns, i)
+        for (i in allCardSigns.distinct()) mapAllCardsBySign[i] = Collections.frequency(allCardSigns, i)
+        for (i in pointCardSigns.distinct()) mapPointCardsBySign[i] = Collections.frequency(pointCardSigns, i)
+        for (i in otherCardSigns.distinct()) mapOtherCardsBySign[i] = Collections.frequency(otherCardSigns, i)
+        for (i in allCardRanks.distinct()) mapAllCardsByRank[i] = Collections.frequency(allCardRanks, i)
+        for (i in pointCardRanks.distinct()) mapPointCardsByRank[i] = Collections.frequency(pointCardRanks, i)
+        for (i in otherCardRanks.distinct()) mapOtherCardsByRank[i] = Collections.frequency(otherCardRanks, i)
 
         if (cardsInHand.isNotEmpty()) {
-            preferredAllCardSign = mapOfAllCards.toList().maxByOrNull { (_, value) -> value }?.first
-                ?: return "-1"
+            preferredAllCardSign = mapAllCardsBySign.toList().maxByOrNull { (_, value) -> value }?.first ?: "-1"
+            preferredAllCardRank = mapAllCardsByRank.maxByOrNull { it.value }?.key ?: "-1"
+        }
+        if (pointCards.isNotEmpty()) {
+            preferredPointCardSign = mapPointCardsBySign.toList().maxByOrNull { (_, value) -> value }?.first ?: "-1"
+            preferredPointCardRank = mapPointCardsByRank.maxByOrNull { it.value }?.key ?: "-1"
+        }
+        if (otherCards.isNotEmpty()) {
+            preferredOtherCardSign = mapOtherCardsBySign.toList().maxByOrNull { (_, value) -> value }?.first ?: "-1"
+            preferredOtherCardRank = mapOtherCardsByRank.maxByOrNull { it.value }?.key ?: "-1"
         }
 
-        if (mapOfPointCards.isNotEmpty()) {
-            preferredPointCardSign = mapOfPointCards.toList().maxByOrNull { (_, value) -> value }?.first
-                ?: return "-1"
-        }
-
-        if (mapOfOtherCards.isNotEmpty()) {
-            preferredOtherCardSign = mapOfOtherCards.toList().maxByOrNull { (_, value) -> value }?.first
-                ?: return "-1"
-        }
-
-//        print("pointSign: $preferredPointCardSign, otherSign: $preferredOtherCardSign ")
-//        println(", allCardsSign: $preferredAllCardSign")
+        println("Signs: point $preferredPointCardSign, other $preferredOtherCardSign, allCards $preferredAllCardSign")
+        println("Ranks: point $preferredPointCardRank, other $preferredOtherCardRank, allCards $preferredAllCardRank")
 
         // Start of deciding which card to throw ...
         // Card to throw when table is empty...
@@ -73,7 +88,6 @@ abstract class GameLogic {
                         break
                     }
                 }
-
             } else if (pointCards.isNotEmpty()) {
                 for (card in pointCards) {
                     val cardSign = card.last().toString()
@@ -82,12 +96,10 @@ abstract class GameLogic {
                         break
                     }
                 }
-
             }
+//            println("Tabla je prazna.")
 
-//            println("Tabla je prazna, igram: $cardToThrow")
-
-        }  else { //if table is not empty ...
+        }  else {      //if table is not empty ...
             val tableCardRank: String
             val tableCardSign: String
 
@@ -104,14 +116,14 @@ abstract class GameLogic {
 
             val pointCardOnTable: Boolean = points.contains(tableCardRank)
 
-            // looping through cardsInHand if table is not empty ...
+                // looping through cardsInHand if table is not empty ...
             loop@ for (card in cardsInHand) {
+
                 val cardRank = card.substring(0, card.lastIndex)
                 val cardSign = card.last().toString()
 
                 if (!allCardSigns.contains(tableCardSign)) {
-
-                    if (allCardsRanks.contains(tableCardRank)) {
+                    if (allCardRanks.contains(tableCardRank)) {
 
                         if (pointCards.contains(card) && cardRank == tableCardRank
                             && preferredAllCardSign == cardSign) {
@@ -143,7 +155,6 @@ abstract class GameLogic {
                         }
 
                     } else {
-
                         if (otherCards.contains(card) && preferredOtherCardSign == cardSign) {
                             cardToThrow = card
 //                            println("Nemam ni broj ni znak karte na tabli, igram obicnu kartu u preferiranom znaku.")
@@ -162,8 +173,7 @@ abstract class GameLogic {
 
                     // 1. if top table card IS a pointCard and there are pointCards in hand...
                 } else if (pointCardOnTable && pointCards.contains(card)) {
-
-                    // 1.
+                        // 1.
                     if (cardSign == tableCardSign && cardSign == preferredPointCardSign) {
                         cardToThrow = card
                         win = true
@@ -194,8 +204,7 @@ abstract class GameLogic {
 
                     // 2. if top table card IS a pointCard, but no PointCards have the same sign or rank ...
                 } else if (pointCardOnTable && otherCards.contains(card)) {
-
-                    // 5.
+                        // 5.
                     if (cardSign == tableCardSign && cardSign == preferredOtherCardSign) {
                         cardToThrow = card
                         win = true
@@ -222,12 +231,10 @@ abstract class GameLogic {
                         win = true
 //                        println("Stih je na tabli.  Nosim sa obicnom kartom u istom broju.")
                         break@loop
-
                     }
 
                     // 3. if top table card is NOT a pointCard and there are pointCards in hand...
                 } else if (!pointCardOnTable && pointCards.contains(card)) {
-
                     // 9.
                     if (cardSign == tableCardSign && cardSign == preferredPointCardSign) {
                         cardToThrow = card
@@ -255,12 +262,10 @@ abstract class GameLogic {
                         win = true
 //                        println("Stih nije na tabli.  Nosim sa stihom u istom broju.")
                         break@loop
-
                     }
 
                     // 4. if top table card is NOT a pointCard, but no PointCards have the same sign or rank ...
                 } else if (!pointCardOnTable && otherCards.contains(card)) {
-
                     // 13.
                     if (cardSign == tableCardSign && cardSign == preferredOtherCardSign) {
                         cardToThrow = card
