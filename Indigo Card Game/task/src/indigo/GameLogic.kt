@@ -1,12 +1,9 @@
 package indigo
-
 import java.util.*
 
 abstract class GameLogic {
     private var win = false
-
     fun chooseCard(table: MutableList<String>, cardsInHand: MutableList<String>): String {
-
         val points = listOf("A", "10", "J", "Q", "K")
         val pointCards = mutableListOf<String>()
         var cardToThrow = "WTF?"
@@ -60,9 +57,8 @@ abstract class GameLogic {
             val cardSign = card.last().toString()
             if (cardSign == prefSign) samePrefSignCards.add(card)
             if (cardRank == prefRank) samePrefRankCards.add(card)
-//            if (candidateCards.isNotEmpty()) prefSign = tableCardSign
-//            if (candidateCards.isNotEmpty()) prefRank = tableCardRank
         }
+
         if (samePrefSignCards.size == 1) samePrefSignCards.clear()
         if (samePrefRankCards.size == 1) samePrefRankCards.clear()
         if (candSignCards.size == 1) candSignCards.clear()
@@ -70,13 +66,10 @@ abstract class GameLogic {
 
         val multipleCandidateCardsRanks = candRankCards.size >= 2
         val multipleCandidateCardsSigns = candSignCards.size >= 2
-
         val multipleRanks = samePrefRankCards.size >= 2
         val multipleSigns = samePrefSignCards.size >= 2
-//        val multipleSignsPrevail = multipleSigns && samePrefSignCards.size >= samePrefRankCards.size
 
         loop@ for (card in cardsInHand) { // Looping through cards and choosing ...
-
             val cardSign = card.last().toString()
             val cardRank = card.substring(0, card.lastIndex)
                 if (cardsInHand.size == 1) { // 1. Only one card in hand.
@@ -89,7 +82,6 @@ abstract class GameLogic {
                     cardToThrow = candidateCards[0]
                     win = true
                     break@loop
-
                 } else if (table.isEmpty()) { // 3. No cards on the table.
                     if (multipleSigns) {
                         message = "3-1. There are more cards in hand with the same suit."
@@ -103,7 +95,6 @@ abstract class GameLogic {
                         message = "3-3. There are no cards with the same suit or rank."
                         cardToThrow = cardsInHand.random()
                     }
-
                 } else if (candidateCards.isEmpty()) { // 4. No candidate cards.
                     if (multipleSigns) {
                         message = "4-1. No candidate cards, but there are more cards with the same suit"
@@ -117,7 +108,6 @@ abstract class GameLogic {
                         message = "4-3. No candidate cards, and no cards in hand with the same suit or rank"
                         cardToThrow = cardsInHand.random()
                     }
-
                 } else { // 5.
                     if (multipleCandidateCardsSigns) {
                         message = "5-1. There are 2 or more candidate cards - same suit as the card on the table"
@@ -137,9 +127,8 @@ abstract class GameLogic {
                     }
                 }
             }
-
         println(cardsInHand.joinToString(" "))
-
+        message += ""
 //        println(message)
 //        println()
 //        println("Candidate cards: $candidateCards")

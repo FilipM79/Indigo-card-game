@@ -1,5 +1,4 @@
 package indigo
-
 interface PrintMessage {
     fun printComputerPlaysCard(computer: Player) = println("Computer plays ${computer.cardToThrow}")
     fun printCardsOnTable(table: MutableList<String>) {

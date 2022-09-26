@@ -1,10 +1,8 @@
 package indigo
-
 fun main() {
     val indigoGame = Game()
     indigoGame.play()
 }
-
 class Game : PrintMessage {
     var gameOver = false
     private val deck = mutableListOf <String>()
